@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -11,14 +12,18 @@ export default async function Home() {
       <h1 className="text-2xl font-bold mb-6">Catálogo</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {productos?.map((producto) => (
-          <div key={producto.id} className="border rounded-lg p-4 shadow-sm">
+          <Link
+            key={producto.id}
+            href={`/productos/${producto.id}`}
+            className="border rounded-lg p-4 shadow-sm block hover:shadow-md transition"
+          >
             <p className="text-xs text-gray-500 uppercase">
               {producto.categorias?.nombre}
             </p>
             <h2 className="font-semibold text-lg">{producto.nombre}</h2>
             <p className="text-gray-700">S/ {producto.precio}</p>
             <p className="text-sm text-gray-500">Stock: {producto.stock}</p>
-          </div>
+          </Link>
         ))}
       </div>
     </main>
