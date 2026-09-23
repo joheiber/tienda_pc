@@ -2,16 +2,25 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function Home() {
   const supabase = await createClient()
-  const { data: categorias } = await supabase.from('categorias').select()
+  const { data: productos } = await supabase
+    .from('productos')
+    .select('*, categorias(nombre)')
 
   return (
-    <main>
-      <h1>Categorías</h1>
-      <ul>
-        {categorias?.map((categoria) => (
-          <li key={categoria.id}>{categoria.nombre}</li>
+    <main className="max-w-5xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Catálogo</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {productos?.map((producto) => (
+          <div key={producto.id} className="border rounded-lg p-4 shadow-sm">
+            <p className="text-xs text-gray-500 uppercase">
+              {producto.categorias?.nombre}
+            </p>
+            <h2 className="font-semibold text-lg">{producto.nombre}</h2>
+            <p className="text-gray-700">S/ {producto.precio}</p>
+            <p className="text-sm text-gray-500">Stock: {producto.stock}</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </main>
   )
 }
