@@ -34,6 +34,9 @@ export function CarritoProvider({ children }) {
   function quitarProducto(productoId) {
     setItems((prev) => prev.filter((item) => item.producto.id !== productoId))
   }
+  function vaciarCarrito() {
+    setItems([])
+  }
 
   const total = items.reduce(
     (suma, item) => suma + item.producto.precio * item.cantidad,
@@ -42,7 +45,7 @@ export function CarritoProvider({ children }) {
 
   return (
     <CarritoContext.Provider
-      value={{ items, agregarProducto, cambiarCantidad, quitarProducto, total }}
+      value={{ items, agregarProducto, cambiarCantidad, quitarProducto, vaciarCarrito,total }}
     >
       {children}
     </CarritoContext.Provider>

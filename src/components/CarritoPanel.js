@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useCarrito } from '@/context/CarritoContext'
 
 export default function CarritoPanel() {
@@ -75,6 +76,16 @@ export default function CarritoPanel() {
             <div className="mt-6 text-xl font-bold">
               Total: S/ {total.toFixed(2)}
             </div>
+
+            {items.length > 0 && (
+              <Link
+                href="/cotizar"
+                onClick={() => setAbierto(false)}
+                className="mt-4 block text-center bg-green-600 text-white rounded py-2 font-medium"
+              >
+                Cotizar
+              </Link>
+            )}
           </div>
         </div>
       )}
