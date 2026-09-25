@@ -13,9 +13,14 @@ export async function createClient() {
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // No se puede escribir cookies desde un Server Component.
+            // Se ignora a propósito: no afecta la lectura de la sesión.
+          }
         },
       },
     }

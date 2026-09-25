@@ -3,12 +3,18 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useCarrito } from '@/context/CarritoContext'
+import { usePathname } from 'next/navigation'
 
 export default function CarritoPanel() {
   const [abierto, setAbierto] = useState(false)
   const { items, cambiarCantidad, quitarProducto, total } = useCarrito()
 
   const cantidadTotal = items.reduce((suma, item) => suma + item.cantidad, 0)
+
+  const pathname = usePathname()
+  const ocultarEnEstaRuta = pathname.startsWith('/login') || pathname.startsWith('/panel')
+
+  if (ocultarEnEstaRuta) return null
 
   return (
     <>
