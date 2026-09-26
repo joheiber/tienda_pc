@@ -4,17 +4,28 @@ import BotonAgregar from '@/components/BotonAgregar'
 
 export default async function Home() {
   const supabase = await createClient()
+
   const { data: productos } = await supabase
-    .from('productos')
-    .select('*, categorias(nombre)')
+  .from('productos')
+  .select('*, categorias(nombre)')
+  .eq('activo', true)
 
   return (
     <main className="max-w-5xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Catálogo</h1>
+
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {productos?.map((producto) => (
           <div key={producto.id} className="border rounded-lg p-4 shadow-sm hover:shadow-md transition">
             <Link href={`/productos/${producto.id}`} className="block">
+              {producto.imagen_url && (
+                <img
+                  src={producto.imagen_url}
+                  alt={producto.nombre}
+                  className="w-full h-32 object-cover rounded mb-2"
+                />
+              )}
               <p className="text-xs text-gray-500 uppercase">
                 {producto.categorias?.nombre}
               </p>

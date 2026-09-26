@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import BotonCerrarSesion from '@/components/panel/BotonCerrarSesion'
 import PanelTabs from '@/components/panel/PanelTabs'
 
+
 export default async function PanelPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,6 +22,11 @@ export default async function PanelPage() {
     .select('*, cotizacion_items(cantidad, productos(nombre, precio))')
     .order('creado_en', { ascending: false })
 
+  const { data: categorias } = await supabase
+    .from('categorias')
+    .select('*')
+    .order('nombre')
+
   return (
     <main className="max-w-3xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -31,7 +37,11 @@ export default async function PanelPage() {
         <BotonCerrarSesion />
       </div>
 
-      <PanelTabs productos={productos ?? []} cotizaciones={cotizaciones ?? []} />
+      <PanelTabs
+        productos={productos ?? []}
+        cotizaciones={cotizaciones ?? []}
+        categorias={categorias ?? []}
+      />
     </main>
   )
 }

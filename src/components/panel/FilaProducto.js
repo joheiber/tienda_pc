@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function FilaProducto({ producto }) {
+  const router = useRouter()
   const [precio, setPrecio] = useState(producto.precio)
   const [stock, setStock] = useState(producto.stock)
   const [guardando, setGuardando] = useState(false)
@@ -27,6 +29,21 @@ export default function FilaProducto({ producto }) {
     }
   }
 
+  async function ocultarProducto() {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('productos')
+      .update({ activo: false })
+      .eq('id', producto.id)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    router.refresh()
+  }
+
   return (
     <tr className="border-b">
       <td className="py-2 pr-4">{producto.nombre}</td>
@@ -47,13 +64,18 @@ export default function FilaProducto({ producto }) {
           className="w-16 border rounded p-1"
         />
       </td>
-      <td className="py-2">
+      <td className="py-2 pr-4">
         <button
           onClick={guardarCambios}
           disabled={guardando}
           className="bg-blue-600 text-white rounded px-3 py-1 text-sm disabled:opacity-50"
         >
           {guardando ? 'Guardando...' : guardado ? 'Guardado ✓' : 'Guardar'}
+        </button>
+      </td>
+      <td className="py-2">
+        <button onClick={ocultarProducto} className="text-red-600 text-sm underline">
+          Ocultar
         </button>
       </td>
     </tr>
