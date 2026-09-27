@@ -14,7 +14,6 @@ export default async function Home() {
 
   return (
     <main className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Catálogo</h1>
     <Buscador productos={productos ?? []} />
     </main>
   )

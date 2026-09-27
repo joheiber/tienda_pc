@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import BotonCerrarSesion from '@/components/panel/BotonCerrarSesion'
 import PanelTabs from '@/components/panel/PanelTabs'
 
-
 export default async function PanelPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -12,27 +11,23 @@ export default async function PanelPage() {
     redirect('/login')
   }
 
-  const { data: productos } = await supabase
-    .from('productos')
-    .select('*')
-    .order('nombre')
-
+  const { data: productos } = await supabase.from('productos').select('*').order('nombre')
   const { data: cotizaciones } = await supabase
     .from('cotizaciones')
     .select('*, cotizacion_items(cantidad, productos(nombre, precio))')
     .order('creado_en', { ascending: false })
+  const { data: categorias } = await supabase.from('categorias').select('*').order('nombre')
 
-  const { data: categorias } = await supabase
-    .from('categorias')
-    .select('*')
-    .order('nombre')
+  const activos = (productos ?? []).filter((p) => p.activo).length
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
+    <main className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Panel del dueño</h1>
-          <p className="text-gray-600 text-sm">Sesión iniciada como: {user.email}</p>
+          <h1 className="text-2xl font-bold text-white">Panel de administración</h1>
+          <p className="text-sm text-slate-400">
+            {activos} productos activos · {cotizaciones?.length ?? 0} cotizaciones
+          </p>
         </div>
         <BotonCerrarSesion />
       </div>

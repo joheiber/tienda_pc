@@ -8,7 +8,7 @@ export default function BotonAgregar({ producto }) {
   return (
     <button
       onClick={() => agregarProducto(producto)}
-      className="mt-2 w-full bg-blue-600 text-white rounded py-1.5 text-sm hover:bg-blue-700"
+      className="w-full bg-cyan-500 text-slate-950 rounded-lg py-1.5 text-sm font-medium hover:bg-cyan-400"
     >
       Agregar
     </button>

@@ -17,10 +17,7 @@ export default function LoginPage() {
     setCargando(true)
 
     const supabase = createClient()
-    const { error: errorLogin } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: errorLogin } = await supabase.auth.signInWithPassword({ email, password })
 
     setCargando(false)
 
@@ -33,37 +30,49 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="max-w-sm mx-auto p-6 mt-12">
-      <h1 className="text-2xl font-bold mb-6">Ingreso del dueño</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-slate-950 p-6">
+      <div className="flex items-center gap-2 mb-6">
+        <span className="bg-cyan-500 text-slate-950 w-8 h-8 rounded-lg flex items-center justify-center font-bold">N</span>
+        <span className="font-bold text-lg text-white">NexusPC</span>
+      </div>
 
-      <form onSubmit={iniciarSesion} className="space-y-3">
-        <input
-          type="email"
-          placeholder="Correo"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded p-2"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded p-2"
-          required
-        />
+      <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <h1 className="text-lg font-bold text-white">Acceso al panel</h1>
+        <p className="text-sm text-slate-500 mb-5">Área restringida — solo staff autorizado</p>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <form onSubmit={iniciarSesion} className="space-y-3">
+          <div>
+            <label className="text-sm text-slate-400">Correo electrónico</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mt-1"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-sm text-slate-400">Contraseña</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mt-1"
+              required
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={cargando}
-          className="w-full bg-blue-600 text-white rounded py-2 font-medium disabled:opacity-50"
-        >
-          {cargando ? 'Ingresando...' : 'Ingresar'}
-        </button>
-      </form>
+          {error && <p className="text-rose-400 text-sm">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={cargando}
+            className="w-full bg-cyan-500 text-slate-950 rounded-lg py-2.5 font-semibold disabled:opacity-50"
+          >
+            {cargando ? 'Ingresando...' : '→ Ingresar'}
+          </button>
+        </form>
+      </div>
     </main>
   )
 }

@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCarrito } from '@/context/CarritoContext'
 import { createClient } from '@/lib/supabase/client'
 
-const NUMERO_WHATSAPP = '51924534553' // reemplaza por el número real de la tienda
+const NUMERO_WHATSAPP = '51987654321'
 
 export default function CotizarPage() {
   const router = useRouter()
@@ -33,16 +34,11 @@ export default function CotizarPage() {
 
     const { data: cotizacion, error: errorCotizacion } = await supabase
       .from('cotizaciones')
-      .insert({
-        cliente_nombre: nombre,
-        cliente_telefono: telefono,
-        total: total,
-      })
+      .insert({ cliente_nombre: nombre, cliente_telefono: telefono, total })
       .select()
       .single()
 
     if (errorCotizacion) {
-         console.error(errorCotizacion)
       setError('No se pudo guardar la cotización. Intenta de nuevo.')
       setGuardando(false)
       return
@@ -54,9 +50,7 @@ export default function CotizarPage() {
       cantidad: item.cantidad,
     }))
 
-    const { error: errorItems } = await supabase
-      .from('cotizacion_items')
-      .insert(itemsParaGuardar)
+    const { error: errorItems } = await supabase.from('cotizacion_items').insert(itemsParaGuardar)
 
     if (errorItems) {
       setError('No se pudieron guardar los productos. Intenta de nuevo.')
@@ -67,9 +61,7 @@ export default function CotizarPage() {
     const lineasProductos = items
       .map((item) => `- ${item.cantidad}x ${item.producto.nombre} (S/ ${(item.producto.precio * item.cantidad).toFixed(2)})`)
       .join('\n')
-
     const mensaje = `Hola, soy ${nombre}. Quiero cotizar:\n\n${lineasProductos}\n\nTotal: S/ ${total.toFixed(2)}`
-
     const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`
 
     vaciarCarrito()
@@ -79,8 +71,8 @@ export default function CotizarPage() {
   if (items.length === 0) {
     return (
       <main className="max-w-2xl mx-auto p-6">
-        <p className="text-gray-500">Tu cotización está vacía.</p>
-        <button onClick={() => router.push('/')} className="mt-4 text-blue-600 underline">
+        <p className="text-slate-500">Tu cotización está vacía.</p>
+        <button onClick={() => router.push('/')} className="mt-4 text-cyan-400 underline">
           Volver al catálogo
         </button>
       </main>
@@ -88,64 +80,73 @@ export default function CotizarPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Confirma tu cotización</h1>
+    <main className="max-w-4xl mx-auto p-6">
+      <Link href="/" className="text-cyan-400 text-sm">← Volver</Link>
+      <h1 className="text-2xl font-bold text-white mt-2 mb-6">Cotización</h1>
 
-      <div className="space-y-4 mb-6">
-        {items.map((item) => (
-          <div key={item.producto.id} className="border-b pb-3">
-            <div className="flex justify-between">
-              <p className="font-medium">{item.producto.nombre}</p>
-              <button
-                onClick={() => quitarProducto(item.producto.id)}
-                className="text-red-500 text-sm"
-              >
-                Quitar
-              </button>
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <input
-                type="number"
-                min="0"
-                value={item.cantidad}
-                onChange={(e) => cambiarCantidad(item.producto.id, Number(e.target.value))}
-                className="w-16 border rounded p-1 text-center"
-              />
-              <p className="text-gray-700">
-                S/ {(item.producto.precio * item.cantidad).toFixed(2)}
-              </p>
-            </div>
+      <div className="grid md:grid-cols-[1fr_320px] gap-6">
+        <div>
+          <p className="text-xs text-slate-500 uppercase mb-3">Productos seleccionados</p>
+          <div className="space-y-3">
+            {items.map((item) => (
+              <div key={item.producto.id} className="bg-slate-900 border border-slate-800 rounded-lg p-3 flex gap-3 items-center">
+                {item.producto.imagen_url ? (
+                  <img src={item.producto.imagen_url} alt={item.producto.nombre} className="w-14 h-14 object-cover rounded" />
+                ) : (
+                  <div className="w-14 h-14 bg-slate-800 rounded flex-shrink-0" />
+                )}
+                <div className="flex-1">
+                  <p className="text-white font-medium">{item.producto.nombre}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button onClick={() => cambiarCantidad(item.producto.id, item.cantidad - 1)} className="w-6 h-6 bg-slate-800 rounded text-white">−</button>
+                    <span className="text-white text-sm">{item.cantidad}</span>
+                    <button onClick={() => cambiarCantidad(item.producto.id, item.cantidad + 1)} className="w-6 h-6 bg-slate-800 rounded text-white">+</button>
+                  </div>
+                </div>
+                <span className="text-cyan-400 font-semibold">S/ {(item.producto.precio * item.cantidad).toFixed(2)}</span>
+                <button onClick={() => quitarProducto(item.producto.id)} className="text-slate-500 hover:text-rose-400">🗑</button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="text-xl font-bold mb-6">Total: S/ {total.toFixed(2)}</div>
+          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mt-3 flex justify-between items-center">
+            <span className="text-slate-400">Total</span>
+            <span className="text-xl font-bold text-white">S/ {total.toFixed(2)}</span>
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <input
-          type="text"
-          placeholder="Tu nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          className="w-full border rounded p-2"
-        />
-        <input
-          type="tel"
-          placeholder="Tu teléfono"
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-          className="w-full border rounded p-2"
-        />
+        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 h-fit">
+          <p className="text-xs text-slate-500 uppercase mb-3">Tus datos</p>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+          <label className="text-sm text-slate-400">Nombre completo</label>
+          <input
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mb-3 mt-1"
+          />
 
-        <button
-          onClick={enviarCotizacion}
-          disabled={guardando}
-          className="w-full bg-green-600 text-white rounded py-2 font-medium disabled:opacity-50"
-        >
-          {guardando ? 'Guardando...' : 'Enviar por WhatsApp'}
-        </button>
+          <label className="text-sm text-slate-400">Teléfono / WhatsApp</label>
+          <input
+            type="tel"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mb-3 mt-1"
+          />
+
+          {error && <p className="text-rose-400 text-sm mb-2">{error}</p>}
+
+          <button
+            onClick={enviarCotizacion}
+            disabled={guardando}
+            className="w-full bg-emerald-500 text-slate-950 rounded-lg py-2.5 font-semibold disabled:opacity-50"
+          >
+            {guardando ? 'Guardando...' : '💬 Enviar por WhatsApp'}
+          </button>
+          <p className="text-xs text-slate-500 mt-2 text-center">
+            Se abrirá WhatsApp con tu cotización lista para enviar.
+          </p>
+        </div>
       </div>
     </main>
   )

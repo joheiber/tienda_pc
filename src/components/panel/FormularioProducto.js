@@ -12,10 +12,9 @@ export default function FormularioProducto({ categorias }) {
   const [categoriaId, setCategoriaId] = useState('')
   const [marca, setMarca] = useState('')
   const [descripcion, setDescripcion] = useState('')
-  const [imagenUrl, setImagenUrl] = useState('')
+  const [imagenArchivo, setImagenArchivo] = useState(null)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
-  const [imagenArchivo, setImagenArchivo] = useState(null)
 
   async function agregarProducto(e) {
     e.preventDefault()
@@ -33,9 +32,7 @@ export default function FormularioProducto({ categorias }) {
 
     if (imagenArchivo) {
       const nombreArchivo = `${Date.now()}-${imagenArchivo.name}`
-      const { error: errorSubida } = await supabase.storage
-        .from('productos')
-        .upload(nombreArchivo, imagenArchivo)
+      const { error: errorSubida } = await supabase.storage.from('productos').upload(nombreArchivo, imagenArchivo)
 
       if (errorSubida) {
         setError('No se pudo subir la imagen.')
@@ -43,10 +40,7 @@ export default function FormularioProducto({ categorias }) {
         return
       }
 
-      const { data: urlData } = supabase.storage
-        .from('productos')
-        .getPublicUrl(nombreArchivo)
-
+      const { data: urlData } = supabase.storage.from('productos').getPublicUrl(nombreArchivo)
       imagenUrlFinal = urlData.publicUrl
     }
 
@@ -67,93 +61,71 @@ export default function FormularioProducto({ categorias }) {
       return
     }
 
-    setNombre('')
-    setPrecio('')
-    setStock('')
-    setCategoriaId('')
-    setMarca('')
-    setDescripcion('')
-    setImagenArchivo(null)
+    setNombre(''); setPrecio(''); setStock(''); setCategoriaId('')
+    setMarca(''); setDescripcion(''); setImagenArchivo(null)
     router.refresh()
   }
 
+  const campo = "w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mt-1"
+  const etiqueta = "text-sm text-cyan-400"
+
   return (
-    <form onSubmit={agregarProducto} className="border rounded-lg p-4 mb-8 space-y-3">
-      <h3 className="font-semibold">Agregar producto nuevo</h3>
-
-      <input
-        type="text"
-        placeholder="Nombre"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        className="w-full border rounded p-2"
-      />
-
-      <div className="flex gap-3">
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Precio"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-          className="w-full border rounded p-2"
-        />
-        <input
-          type="number"
-          placeholder="Stock"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          className="w-full border rounded p-2"
-        />
+    <form onSubmit={agregarProducto} className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className={etiqueta}>Nombre del producto *</label>
+          <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className={campo} />
+        </div>
+        <div>
+          <label className={etiqueta}>Marca</label>
+          <input type="text" value={marca} onChange={(e) => setMarca(e.target.value)} className={campo} />
+        </div>
       </div>
 
-      <select
-        value={categoriaId}
-        onChange={(e) => setCategoriaId(e.target.value)}
-        className="w-full border rounded p-2"
-      >
-        <option value="">Selecciona una categoría</option>
-        {categorias.map((categoria) => (
-          <option key={categoria.id} value={categoria.id}>
-            {categoria.nombre}
-          </option>
-        ))}
-      </select>
-
-      <input
-        type="text"
-        placeholder="Marca (opcional)"
-        value={marca}
-        onChange={(e) => setMarca(e.target.value)}
-        className="w-full border rounded p-2"
-      />
-
-      <textarea
-        placeholder="Descripción (opcional)"
-        value={descripcion}
-        onChange={(e) => setDescripcion(e.target.value)}
-        className="w-full border rounded p-2"
-        rows={2}
-      />
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className={etiqueta}>Precio USD *</label>
+          <input type="number" step="0.01" value={precio} onChange={(e) => setPrecio(e.target.value)} className={campo} />
+        </div>
+        <div>
+          <label className={etiqueta}>Stock *</label>
+          <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} className={campo} />
+        </div>
+      </div>
 
       <div>
-        <label className="text-sm text-gray-600">Foto del producto (opcional)</label>
+        <label className={etiqueta}>Categoría *</label>
+        <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} className={campo}>
+          <option value="">Selecciona una categoría</option>
+          {categorias.map((c) => (
+            <option key={c.id} value={c.id}>{c.nombre}</option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className={etiqueta}>Descripción</label>
+        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} className={campo} rows={3} />
+      </div>
+
+      <div>
+        <label className={etiqueta}>Foto del producto</label>
         <input
           type="file"
           accept="image/*"
           onChange={(e) => setImagenArchivo(e.target.files[0])}
-          className="w-full border rounded p-2"
+          className={campo}
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-rose-400 text-sm">{error}</p>}
 
       <button
         type="submit"
         disabled={guardando}
-        className="bg-blue-600 text-white rounded px-4 py-2 text-sm disabled:opacity-50"
+        className="bg-cyan-500 text-slate-950 rounded-lg px-5 py-2.5 font-semibold disabled:opacity-50"
       >
-        {guardando ? 'Agregando...' : 'Agregar producto'}
+        {guardando ? 'Agregando...' : '+ Agregar producto'}
       </button>
     </form>
   )
