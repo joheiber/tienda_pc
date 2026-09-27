@@ -15,6 +15,7 @@ export default function FormularioProducto({ categorias }) {
   const [imagenUrl, setImagenUrl] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const [imagenArchivo, setImagenArchivo] = useState(null)
 
   async function agregarProducto(e) {
     e.preventDefault()
@@ -28,6 +29,27 @@ export default function FormularioProducto({ categorias }) {
     setGuardando(true)
     const supabase = createClient()
 
+    let imagenUrlFinal = null
+
+    if (imagenArchivo) {
+      const nombreArchivo = `${Date.now()}-${imagenArchivo.name}`
+      const { error: errorSubida } = await supabase.storage
+        .from('productos')
+        .upload(nombreArchivo, imagenArchivo)
+
+      if (errorSubida) {
+        setError('No se pudo subir la imagen.')
+        setGuardando(false)
+        return
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('productos')
+        .getPublicUrl(nombreArchivo)
+
+      imagenUrlFinal = urlData.publicUrl
+    }
+
     const { error: errorInsert } = await supabase.from('productos').insert({
       nombre,
       precio: Number(precio),
@@ -35,7 +57,7 @@ export default function FormularioProducto({ categorias }) {
       categoria_id: Number(categoriaId),
       marca: marca || null,
       descripcion: descripcion || null,
-      imagen_url: imagenUrl || null,
+      imagen_url: imagenUrlFinal,
     })
 
     setGuardando(false)
@@ -51,7 +73,7 @@ export default function FormularioProducto({ categorias }) {
     setCategoriaId('')
     setMarca('')
     setDescripcion('')
-    setImagenUrl('')
+    setImagenArchivo(null)
     router.refresh()
   }
 
@@ -114,13 +136,15 @@ export default function FormularioProducto({ categorias }) {
         rows={2}
       />
 
-      <input
-        type="text"
-        placeholder="URL de la imagen (opcional)"
-        value={imagenUrl}
-        onChange={(e) => setImagenUrl(e.target.value)}
-        className="w-full border rounded p-2"
-      />
+      <div>
+        <label className="text-sm text-gray-600">Foto del producto (opcional)</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImagenArchivo(e.target.files[0])}
+          className="w-full border rounded p-2"
+        />
+      </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
