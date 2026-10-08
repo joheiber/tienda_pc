@@ -25,6 +25,12 @@ export default function FormularioProducto({ categorias }) {
       return
     }
 
+    // NUEVO: no permitir negativos
+    if (Number(precio) < 0 || Number(stock) < 0) {
+      setError('El precio y el stock no pueden ser negativos.')
+      return
+    }
+
     setGuardando(true)
     const supabase = createClient()
 
@@ -85,11 +91,13 @@ export default function FormularioProducto({ categorias }) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label className={etiqueta}>Precio USD *</label>
-          <input type="number" step="0.01" value={precio} onChange={(e) => setPrecio(e.target.value)} className={campo} />
+          {/* NUEVO: min="0" */}
+          <input type="number" step="0.01" min="0" value={precio} onChange={(e) => setPrecio(e.target.value)} className={campo} />
         </div>
         <div>
           <label className={etiqueta}>Stock *</label>
-          <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} className={campo} />
+          {/* NUEVO: min="0" */}
+          <input type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} className={campo} />
         </div>
       </div>
 

@@ -10,22 +10,33 @@ export default function FilaProducto({ producto }) {
   const [stock, setStock] = useState(producto.stock)
   const [guardando, setGuardando] = useState(false)
   const [guardado, setGuardado] = useState(false)
+  const [error, setError] = useState('')  // NUEVO
 
   async function guardarCambios() {
+    setError('')  // NUEVO
+
+    // NUEVO: no permitir negativos
+    if (Number(precio) < 0 || Number(stock) < 0) {
+      setError('El precio y el stock no pueden ser negativos.')
+      return
+    }
+
     setGuardando(true)
     setGuardado(false)
     const supabase = createClient()
 
-    const { error } = await supabase
+    const { error: errorUpdate } = await supabase
       .from('productos')
       .update({ precio: Number(precio), stock: Number(stock) })
       .eq('id', producto.id)
 
     setGuardando(false)
 
-    if (!error) {
+    if (!errorUpdate) {
       setGuardado(true)
       setTimeout(() => setGuardado(false), 2000)
+    } else {
+      setError('No se pudo guardar. Intenta de nuevo.')  // NUEVO
     }
   }
 
@@ -49,6 +60,7 @@ export default function FilaProducto({ producto }) {
         <input
           type="number"
           step="0.01"
+          min="0"
           value={precio}
           onChange={(e) => setPrecio(e.target.value)}
           className="w-24 bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-white"
@@ -57,6 +69,7 @@ export default function FilaProducto({ producto }) {
       <td className="py-3 px-4">
         <input
           type="number"
+          min="0"
           value={stock}
           onChange={(e) => setStock(e.target.value)}
           className="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-white"
@@ -78,6 +91,7 @@ export default function FilaProducto({ producto }) {
             👁 Ocultar
           </button>
         </div>
+        {error && <p className="text-rose-400 text-xs mt-1">{error}</p>}
       </td>
     </tr>
   )
