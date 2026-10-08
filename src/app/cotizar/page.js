@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useCarrito } from '@/context/CarritoContext'
 import { createClient } from '@/lib/supabase/client'
 
-const NUMERO_WHATSAPP = '51987654321'
+const NUMERO_WHATSAPP = process.env.NEXT_PUBLIC_NUMERO_WHATSAPP
 
 export default function CotizarPage() {
   const router = useRouter()
